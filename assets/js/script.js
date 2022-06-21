@@ -117,7 +117,12 @@
 
 
             // generate id
-            const id = products.length;
+            let id = products.length;
+            const storeProducts = localStorage.getItem('storeProducts')
+            if(storeProducts) {
+                id = JSON.parse(storeProducts).length;
+            }
+            
             // add item to data store
             const product = {
                 id,
