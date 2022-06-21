@@ -21,7 +21,7 @@
         if(!name || name.length < 3) {
             isError = true;
         }
-        if(!price || Number(price) < 0) {
+        if(!price || Number(price) < 0 || isNaN(price)) {
             isError = true;
         }
 
@@ -55,7 +55,7 @@
         products = products.filter(item => item.id !== id);
     }
 
-    const showAllItemToUI = (filteredArr) => {
+    const showAllItemsToUI = (filteredArr) => {
         listGroupElm.innerHTML = '';
         filteredArr.forEach(item => {
 
@@ -67,8 +67,38 @@
 
         })
 
-
     }
+
+    const addItemToStorage = (product) => {
+
+        let products;
+        const storeProducts = localStorage.getItem('storeProducts')
+        if(storeProducts) {
+            products = JSON.parse(storeProducts);
+            products.push(product);
+
+            // update to local storage
+            localStorage.setItem('storeProducts', JSON.stringify(products));
+
+        } else {
+
+            products = [];
+            products.push(product);
+            // update to local storage
+            localStorage.setItem('storeProducts', JSON.stringify(products));
+        }
+    }
+
+    const removeFromLocalStorage = (id) => {
+        // pick from local storage
+        let products = JSON.parse(localStorage.getItem('storeProducts'));
+        // filter data
+        products = products.filter(item => item.id !== id);
+        // save data to storage
+        localStorage.setItem('storeProducts', JSON.stringify(products));
+    }
+
+
 
     const init = () => {
             
@@ -89,12 +119,17 @@
             // generate id
             const id = products.length;
             // add item to data store
-            products.push({
+            const product = {
                 id,
                 name: nameInput,
                 price: priceInput
-            })
+            }
+
+            products.push(product)
             addItemToUI(id, nameInput, priceInput);
+
+            // add item to localStorage
+            addItemToStorage(product);
 
             // reset the input
             resetInput();
@@ -111,6 +146,9 @@
         
                 // delete item from data store
                 removeItemFromDataStore(id);
+
+                // delete product from local storage
+                removeFromLocalStorage(id);
             }
         })
 
@@ -120,11 +158,18 @@
             const result = products.filter(product => product.name.includes(filteredValue));
         
             // show on DOM
-            showAllItemToUI(result);
+            showAllItemsToUI(result);
+        })
+
+        document.addEventListener('DOMContentLoaded', e => {
+            // checking item into local storage
+            const storeProducts = localStorage.getItem('storeProducts');
+            if(storeProducts) {
+                const products = JSON.parse(storeProducts);
+                showAllItemsToUI(products);
+            }
         })
         
     }
-
     init();
-
 })();
